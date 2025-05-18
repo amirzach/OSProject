@@ -1,8 +1,8 @@
 const CACHE_NAME = 'amiros-v1';
 const urlsToCache = [
-    './',
-    './AmirOS.html',
-    './manifest.json',
+    '/',
+    '/AmirOS.html',
+    '/manifest.json',
     'https://fonts.googleapis.com/icon?family=Material+Icons',
     'https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2'
 ];

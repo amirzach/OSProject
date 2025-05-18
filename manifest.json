@@ -2,7 +2,7 @@
   "name": "AmirOS Logo Drawer",
   "short_name": "AmirOS",
   "description": "AmirOS Logo Drawer - A Progressive Web App",
-  "start_url": "./",
+  "start_url": "/AmirOS.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
@@ -31,8 +31,8 @@
   ],
   "shortcuts": [
     {
-      "name": "Draw Logo",
-      "short_name": "Draw",
+      "name": "AmirOS",
+      "short_name": "Enter",
       "description": "Animate the AmirOS logo",
       "url": "./",
       "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
