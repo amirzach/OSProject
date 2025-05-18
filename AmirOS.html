@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AmirOS Logo Drawer</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="AmirOS Logo Drawer - A Progressive Web App">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="AmirOS">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        #canvas {
+            border: 2px solid #000;
+            background-color: #000;
+        }
+
+        #drawButton {
+            margin-top: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        #drawButton:hover {
+            transform: scale(1.1);
+        }
+
+        #drawButton:active {
+            transform: scale(0.95);
+        }
+
+        .material-icons {
+            font-size: 48px;
+            color: #fff;
+            transition: color 0.3s;
+        }
+
+        #drawButton:hover .material-icons {
+            color: #00d4ff;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="600" height="400"></canvas>
+    <button id="drawButton">
+        <span class="material-icons">fingerprint</span>
+    </button>
+
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(function(err) {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const drawButton = document.getElementById('drawButton');
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Draw logo with line-by-line animation
+        function animatedDraw() {
+            clearCanvas();
+            
+            let progress = 0;
+            const animationDuration = 3000; // 3 seconds total
+            const startTime = Date.now();
+            
+            function animate() {
+                const currentTime = Date.now();
+                progress = Math.min((currentTime - startTime) / animationDuration, 1);
+                
+                // Clear and redraw with current progress
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                drawLogoAnimated(progress);
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+            
+            animate();
+        }
+
+        function drawLogoAnimated(progress) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            // Define animation stages
+            const stages = [
+                { start: 0.0, end: 0.3 },   // Outer circle
+                { start: 0.3, end: 0.6 },   // Letter A - left stroke
+                { start: 0.6, end: 0.8 },   // Letter A - right stroke
+                { start: 0.8, end: 0.9 },   // Letter A - crossbar
+                { start: 0.9, end: 1.0 },   // Text below
+            ];
+            
+            // Stage 1: Outer circle (animated stroke)
+            if (progress >= stages[0].start) {
+                const stageProgress = Math.min((progress - stages[0].start) / (stages[0].end - stages[0].start), 1);
+                const endAngle = stageProgress * 2 * Math.PI;
+                
+                ctx.beginPath();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 6;
+                ctx.arc(centerX, centerY, 80, -Math.PI/2, -Math.PI/2 + endAngle);
+                ctx.stroke();
+            }
+            
+            // Letter A dimensions
+            const letterHeight = 80;
+            const letterWidth = 60;
+            const topY = centerY - letterHeight/2;
+            const bottomY = centerY + letterHeight/2;
+            const leftX = centerX - letterWidth/2;
+            const rightX = centerX + letterWidth/2;
+            const crossbarY = centerY + letterHeight/6;
+            
+            // Stage 2: Letter A - left stroke
+            if (progress >= stages[1].start) {
+                const stageProgress = Math.min((progress - stages[1].start) / (stages[1].end - stages[1].start), 1);
+                
+                ctx.beginPath();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                
+                // Draw left stroke progressively
+                const currentY = topY + (bottomY - topY) * stageProgress;
+                const currentX = leftX + (centerX - leftX) * stageProgress;
+                
+                ctx.moveTo(centerX, topY);
+                ctx.lineTo(currentX, currentY);
+                ctx.stroke();
+            }
+            
+            // Stage 3: Letter A - right stroke
+            if (progress >= stages[2].start) {
+                const stageProgress = Math.min((progress - stages[2].start) / (stages[2].end - stages[2].start), 1);
+                
+                ctx.beginPath();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                
+                // Draw right stroke progressively
+                const currentY = topY + (bottomY - topY) * stageProgress;
+                const currentX = centerX + (rightX - centerX) * stageProgress;
+                
+                ctx.moveTo(centerX, topY);
+                ctx.lineTo(currentX, currentY);
+                ctx.stroke();
+                
+                // Also keep the left stroke visible
+                ctx.moveTo(centerX, topY);
+                ctx.lineTo(leftX, bottomY);
+                ctx.stroke();
+            }
+            
+            // Stage 4: Letter A - crossbar
+            if (progress >= stages[3].start) {
+                const stageProgress = Math.min((progress - stages[3].start) / (stages[3].end - stages[3].start), 1);
+                
+                ctx.beginPath();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                
+                // Calculate crossbar endpoints
+                const crossbarLeftX = centerX - letterWidth/2 * 0.6;
+                const crossbarRightX = centerX + letterWidth/2 * 0.6;
+                
+                // Draw crossbar progressively
+                const currentX = crossbarLeftX + (crossbarRightX - crossbarLeftX) * stageProgress;
+                
+                ctx.moveTo(crossbarLeftX, crossbarY);
+                ctx.lineTo(currentX, crossbarY);
+                ctx.stroke();
+                
+                // Keep previous strokes visible
+                ctx.moveTo(centerX, topY);
+                ctx.lineTo(leftX, bottomY);
+                ctx.moveTo(centerX, topY);
+                ctx.lineTo(rightX, bottomY);
+                ctx.stroke();
+            }
+            
+            // Stage 5: Text below with typing effect
+            if (progress >= stages[4].start) {
+                const stageProgress = Math.min((progress - stages[4].start) / (stages[4].end - stages[4].start), 1);
+                
+                const fullText = '4M1R OS';
+                const charactersToShow = Math.floor(stageProgress * fullText.length);
+                const visibleText = fullText.substring(0, charactersToShow);
+                
+                // Add blinking cursor if we're still typing
+                const displayText = stageProgress < 1 ? visibleText + '|' : visibleText;
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(displayText, centerX, centerY + 140);
+            }
+        }
+
+        // Add event listener for animated draw
+        drawButton.addEventListener('click', function() {
+            animatedDraw();
+        });
+    </script>
+
+    <script type="application/json" id="manifest-data">
+    {
+        "name": "AmirOS Logo Drawer",
+        "short_name": "AmirOS",
+        "description": "AmirOS Logo Drawer - A Progressive Web App",
+        "start_url": "./",
+        "display": "standalone",
+        "background_color": "#000000",
+        "theme_color": "#000000",
+        "orientation": "portrait-primary",
+        "icons": [
+            {
+                "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiBmaWxsPSIjMDAwMDAwIi8+CjxjaXJjbGUgY3g9Ijk2IiBjeT0iOTYiIHI9IjgwIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iNiIgZmlsbD0ibm9uZSIvPgo8cGF0aCBkPSJNNjYgMTQ2TDk2IDY2TDEyNiAxNDZNNzYgMTEwSDE1NiIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8dGV4dCB4PSI5NiIgeT0iMTcwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj40TUlSIE9TPC90ZXh0Pgo8L3N2Zz4=",
+                "sizes": "192x192",
+                "type": "image/svg+xml"
+            },
+            {
+                "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSIjMDAwMDAwIi8+CjxjaXJjbGUgY3g9IjI1NiIgY3k9IjI1NiIgcj0iMjEwIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMTYiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTE3NiAzODZMMjU2IDE3NkwzMzYgMzg2TTE5NiAyODZINDE2IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMTYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8dGV4dCB4PSIyNTYiIHk9IjQ1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjY0IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iI0ZGRkZGRiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+NE1JUiBPUzwvdGV4dD4KPC9zdmc+",
+                "sizes": "512x512",
+                "type": "image/svg+xml"
+            }
+        ]
+    }
+    </script>
+
+    <script>
+        // Create manifest.json dynamically
+        const manifestData = JSON.parse(document.getElementById('manifest-data').textContent);
+        const manifestBlob = new Blob([JSON.stringify(manifestData, null, 2)], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.querySelector('link[rel="manifest"]').href = manifestURL;
+
+        // Create service worker
+        const swCode = `
+const CACHE_NAME = 'amiros-v1';
+const urlsToCache = [
+    './',
+    'https://fonts.googleapis.com/icon?family=Material+Icons'
+];
+
+self.addEventListener('install', function(event) {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(function(cache) {
+                return cache.addAll(urlsToCache);
+            })
+    );
+});
+
+self.addEventListener('fetch', function(event) {
+    event.respondWith(
+        caches.match(event.request)
+            .then(function(response) {
+                if (response) {
+                    return response;
+                }
+                return fetch(event.request);
+            }
+        )
+    );
+});
+        `;
+
+        // Register the service worker with the inline code
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                const swBlob = new Blob([swCode], {type: 'application/javascript'});
+                const swURL = URL.createObjectURL(swBlob);
+                
+                navigator.serviceWorker.register(swURL)
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(function(err) {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
