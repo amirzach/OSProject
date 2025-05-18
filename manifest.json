@@ -2,7 +2,7 @@
   "name": "AmirOS Logo Drawer",
   "short_name": "AmirOS",
   "description": "AmirOS Logo Drawer - A Progressive Web App",
-  "start_url": "/AmirOS.html",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
